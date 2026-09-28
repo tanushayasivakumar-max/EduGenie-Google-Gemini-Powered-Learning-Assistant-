@@ -1,0 +1,697 @@
+```html
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        EduGenie - AI Learning Assistant
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+    <main class="container">
+
+
+        <!-- HEADER -->
+
+        <header class="hero">
+
+            <div class="badge">
+                AI Learning Assistant
+            </div>
+
+            <h1>
+                EduGenie
+            </h1>
+
+            <p>
+                Learn smarter with AI-powered
+                explanations, quizzes and study paths.
+            </p>
+
+        </header>
+
+
+        <!-- INPUT CARD -->
+
+        <section class="card">
+
+            <label for="task">
+                Choose a task
+            </label>
+
+
+            <select id="task">
+
+                <option value="qa">
+                    Ask a Question
+                </option>
+
+                <option value="explain">
+                    Explain a Topic
+                </option>
+
+                <option value="quiz">
+                    Generate Quiz
+                </option>
+
+                <option value="summarize">
+                    Summarize
+                </option>
+
+                <option value="learn">
+                    Learning Path
+                </option>
+
+            </select>
+
+
+            <label
+                for="inputText"
+                id="inputLabel"
+            >
+                Your question
+            </label>
+
+
+            <textarea
+                id="inputText"
+                rows="9"
+                placeholder="Example: What is the largest ocean?"
+            ></textarea>
+
+
+            <button
+                id="submitBtn"
+                type="button"
+            >
+                Generate
+            </button>
+
+
+            <p
+                id="status"
+                class="status"
+            ></p>
+
+        </section>
+
+
+        <!-- RESULT CARD -->
+
+        <section class="card result-card">
+
+            <div class="result-heading">
+
+                <h2>
+                    Result
+                </h2>
+
+                <button
+                    id="copyBtn"
+                    class="secondary"
+                    type="button"
+                >
+                    Copy
+                </button>
+
+            </div>
+
+
+            <div
+                id="result"
+                class="result"
+            >
+                Your result will appear here.
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+<script>
+
+
+const task =
+    document.getElementById("task");
+
+const inputText =
+    document.getElementById("inputText");
+
+const inputLabel =
+    document.getElementById("inputLabel");
+
+const submitBtn =
+    document.getElementById("submitBtn");
+
+const status =
+    document.getElementById("status");
+
+const result =
+    document.getElementById("result");
+
+const copyBtn =
+    document.getElementById("copyBtn");
+
+
+
+/* --------------------------------
+   Task Configuration
+-------------------------------- */
+
+const config = {
+
+    qa: {
+
+        label: "Your question",
+
+        placeholder:
+            "Example: What is the largest ocean?",
+
+        button:
+            "Answer"
+    },
+
+
+    explain: {
+
+        label:
+            "Topic to explain",
+
+        placeholder:
+            "Example: Explain photosynthesis for a beginner.",
+
+        button:
+            "Explain"
+    },
+
+
+    quiz: {
+
+        label:
+            "Topic or passage",
+
+        placeholder:
+            "Paste a topic or study passage here...",
+
+        button:
+            "Generate Quiz"
+    },
+
+
+    summarize: {
+
+        label:
+            "Text to summarize",
+
+        placeholder:
+            "Paste a long educational passage here...",
+
+        button:
+            "Summarize"
+    },
+
+
+    learn: {
+
+        label:
+            "Topic for your learning path",
+
+        placeholder:
+            "Example: SQL from beginner to advanced",
+
+        button:
+            "Build Path"
+    }
+
+};
+
+
+
+/* --------------------------------
+   Update UI
+-------------------------------- */
+
+function updateUI() {
+
+    const selected =
+        config[task.value];
+
+    inputLabel.textContent =
+        selected.label;
+
+    inputText.placeholder =
+        selected.placeholder;
+
+    submitBtn.textContent =
+        selected.button;
+}
+
+
+task.addEventListener(
+    "change",
+    updateUI
+);
+
+updateUI();
+
+
+
+/* --------------------------------
+   HTML Escape
+-------------------------------- */
+
+function escapeHTML(value) {
+
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+}
+
+
+
+/* --------------------------------
+   Render Text
+-------------------------------- */
+
+function renderText(text) {
+
+    return escapeHTML(
+        text
+    ).replace(
+        /\n/g,
+        "<br>"
+    );
+}
+
+
+
+/* --------------------------------
+   Render Quiz
+-------------------------------- */
+
+function renderQuiz(data) {
+
+    const questions =
+        data.questions || [];
+
+
+    return questions.map(
+        (question, index) => {
+
+            const options =
+                question.options
+                    .map(
+                        (option, optionIndex) => {
+
+                            const letter =
+                                String.fromCharCode(
+                                    65 + optionIndex
+                                );
+
+                            return `
+                                <li>
+                                    <strong>
+                                        ${letter}.
+                                    </strong>
+
+                                    ${escapeHTML(option)}
+                                </li>
+                            `;
+                        }
+                    )
+                    .join("");
+
+
+            const correctLetter =
+                String.fromCharCode(
+                    65 + question.correct_answer
+                );
+
+
+            return `
+
+                <article class="quiz-question">
+
+                    <h3>
+                        ${index + 1}.
+                        ${escapeHTML(
+                            question.question
+                        )}
+                    </h3>
+
+
+                    <ol type="A">
+
+                        ${options}
+
+                    </ol>
+
+
+                    <details>
+
+                        <summary>
+                            Show Answer
+                        </summary>
+
+
+                        <p>
+
+                            <strong>
+                                ${correctLetter}
+                            </strong>
+
+                            -
+
+                            ${escapeHTML(
+                                question.explanation
+                            )}
+
+                        </p>
+
+                    </details>
+
+                </article>
+
+            `;
+        }
+    ).join("");
+}
+
+
+
+/* --------------------------------
+   Submit Request
+-------------------------------- */
+
+submitBtn.addEventListener(
+    "click",
+    async () => {
+
+        const text =
+            inputText.value.trim();
+
+
+        if (!text) {
+
+            status.textContent =
+                "Please enter some text first.";
+
+            return;
+        }
+
+
+        submitBtn.disabled =
+            true;
+
+
+        status.textContent =
+            "EduGenie is thinking...";
+
+
+        result.innerHTML =
+            "";
+
+
+        const endpoints = {
+
+            qa:
+                "/qa",
+
+            explain:
+                "/explain",
+
+            quiz:
+                "/quiz",
+
+            summarize:
+                "/summarize",
+
+            learn:
+                "/learn/recommendations"
+
+        };
+
+
+        const endpoint =
+            endpoints[task.value];
+
+
+        let body;
+
+
+        if (task.value === "qa") {
+
+            body = {
+                question: text
+            };
+
+        }
+
+        else if (
+            task.value === "explain"
+        ) {
+
+            body = {
+                topic: text
+            };
+
+        }
+
+        else {
+
+            body = {
+                text: text
+            };
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    endpoint,
+                    {
+
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify(body)
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    "Request failed."
+                );
+            }
+
+
+            /* Q&A */
+
+            if (
+                task.value === "qa"
+            ) {
+
+                result.innerHTML =
+                    renderText(
+                        data.answer
+                    );
+
+            }
+
+
+            /* Explanation */
+
+            else if (
+                task.value === "explain"
+            ) {
+
+                result.innerHTML =
+                    renderText(
+                        data.explanation
+                    );
+
+            }
+
+
+            /* Quiz */
+
+            else if (
+                task.value === "quiz"
+            ) {
+
+                result.innerHTML =
+                    renderQuiz(data);
+
+            }
+
+
+            /* Summary */
+
+            else if (
+                task.value === "summarize"
+            ) {
+
+                result.innerHTML =
+                    renderText(
+                        data.summary
+                    );
+
+            }
+
+
+            /* Learning Path */
+
+            else {
+
+                result.innerHTML =
+                    renderText(
+                        data.learning_path
+                    );
+
+            }
+
+
+            status.textContent =
+                "Done.";
+
+        }
+
+
+        catch (error) {
+
+            result.innerHTML = `
+
+                <p class="error">
+
+                    ${escapeHTML(
+                        error.message
+                    )}
+
+                </p>
+
+            `;
+
+            status.textContent =
+                "Something went wrong.";
+
+        }
+
+
+        finally {
+
+            submitBtn.disabled =
+                false;
+
+        }
+
+    }
+);
+
+
+
+/* --------------------------------
+   Copy Result
+-------------------------------- */
+
+copyBtn.addEventListener(
+    "click",
+    async () => {
+
+        const text =
+            result.innerText.trim();
+
+
+        if (!text) {
+            return;
+        }
+
+
+        try {
+
+            await navigator.clipboard
+                .writeText(text);
+
+            status.textContent =
+                "Result copied.";
+
+        }
+
+        catch {
+
+            status.textContent =
+                "Could not copy the result.";
+
+        }
+
+    }
+);
+
+
+</script>
+
+
+</body>
+
+</html>
+```
