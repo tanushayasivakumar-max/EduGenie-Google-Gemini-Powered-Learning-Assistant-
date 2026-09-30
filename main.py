@@ -1,4 +1,3 @@
-```python
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -207,4 +206,3 @@ async def learning_recommendations(
             status_code=500,
             detail=str(error)
         )
-```
