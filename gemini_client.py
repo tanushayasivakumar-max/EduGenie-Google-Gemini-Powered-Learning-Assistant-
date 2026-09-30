@@ -1,4 +1,3 @@
-```python
 import os
 from functools import lru_cache
 
@@ -123,4 +122,3 @@ def generate_json(
         )
 
     return text.strip()
-```
