@@ -1,4 +1,3 @@
-````python
 import json
 
 from pydantic import BaseModel, Field
@@ -179,4 +178,3 @@ Rules:
     )
 
     return validated.model_dump()
-````
