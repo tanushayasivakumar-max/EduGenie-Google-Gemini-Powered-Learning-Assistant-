@@ -1,4 +1,3 @@
-```python
 from gemini_client import generate_text
 
 
@@ -22,4 +21,3 @@ Requirements:
 """
 
     return generate_text(prompt)
-```
